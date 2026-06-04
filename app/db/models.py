@@ -19,6 +19,7 @@ class User(Base):
     age: Mapped[Optional[int]] = mapped_column(nullable=True)
     bio: Mapped[Optional[str]] = mapped_column(String(500), nullable=True)
     is_active: Mapped[bool] = mapped_column(default=True)
+    is_verified: Mapped[bool] = mapped_column(default=False)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
 
     languages: Mapped[list["UserLanguage"]] = relationship(
@@ -44,8 +45,7 @@ class UserLanguage(Base):
     id: Mapped[int] = mapped_column(primary_key=True)
     user_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"))
     language: Mapped[str] = mapped_column(String(50), nullable=False)
-    is_native: Mapped[bool] = mapped_column(default=False)
-    level: Mapped[Optional[str]] = mapped_column(String(20), nullable=True)  # beginner/intermediate/advanced
+    level: Mapped[Optional[str]] = mapped_column(String(20), nullable=False)
 
     user: Mapped["User"] = relationship(back_populates="languages")
 
