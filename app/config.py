@@ -16,6 +16,10 @@ class Settings(BaseSettings):
     SECRET_KEY: str
     REDIS_URL: str
 
+    algorithm: str = "HS256"
+    access_token_expire_minutes: int = 30
+    refresh_token_expire_days: int = 30
+
     model_config = SettingsConfigDict(env_file=ENV_FILE, env_file_encoding="utf-8")
 
     @property
