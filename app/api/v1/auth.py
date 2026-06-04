@@ -4,7 +4,7 @@ from fastapi import APIRouter, Depends
 from fastapi.security import OAuth2PasswordRequestForm
 
 from app.db.session import db_dependency
-from app.schemas.auth import UserRegister, TokenResponse, RefreshRequest
+from app.schemas.auth import UserRegister, TokenResponse, RefreshRequest, TokenPair
 from app.service.auth import register_user, refresh_tokens, logout_user, login_user
 
 router = APIRouter(prefix="/api/v1/auth", tags=["Auth"])
@@ -12,7 +12,15 @@ router = APIRouter(prefix="/api/v1/auth", tags=["Auth"])
 
 @router.post("/register", response_model=TokenResponse)
 async def register(db: db_dependency, data: UserRegister):
-    return await register_user(db, data.username, str(data.email), data.password)
+    return await register_user(
+        db=db,
+        username=data.username,
+        email=str(data.email),
+        password=data.password,
+        native_l=data.native_language,
+        learning_l=data.learning_language,
+        learning_level=data.learning_level,
+    )
 
 
 @router.post("/login", response_model=TokenResponse)
@@ -23,7 +31,7 @@ async def login(
     return await login_user(db, data.username, data.password)
 
 
-@router.post("/refresh", response_model=TokenResponse)
+@router.post("/refresh", response_model=TokenPair)
 async def refresh(body: RefreshRequest, db: db_dependency):
     return await refresh_tokens(db, body.refresh_token)
 

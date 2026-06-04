@@ -1,3 +1,4 @@
+import hashlib
 import secrets
 from datetime import datetime, timedelta, timezone
 from typing import Annotated
@@ -6,88 +7,100 @@ from fastapi import HTTPException, Depends, status
 from fastapi.security import OAuth2PasswordBearer
 from jose import jwt, JWTError
 from passlib.context import CryptContext
-from sqlalchemy import select
+from sqlalchemy import select, or_
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.db.models import User, RefreshToken
+from app.db.models import User, RefreshToken, UserLanguage
 from app.config import settings
 from app.db.session import db_dependency
 
-SECRET_KEY = settings.secret_key
-ALGORITHM = "HS256"
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 oauth2_bearer = OAuth2PasswordBearer(tokenUrl="/api/v1/auth/login")
 
 
-def hash_password(password: str) -> str:
+def _hash_password(password: str) -> str:
     return pwd_context.hash(password)
 
 
-def verify_password(plain: str, hashed: str) -> bool:
+def _hash_token(token: str) -> str:
+    return hashlib.sha256(token.encode()).hexdigest()
+
+
+def _verify_password(plain: str, hashed: str) -> bool:
     return pwd_context.verify(plain, hashed)
 
 
-def create_access_token(user_id: int) -> str:
-    expire = datetime.now(timezone.utc) + timedelta(minutes=30)
+def _create_access_token(user_id: int) -> str:
+    expire = datetime.now(timezone.utc) + timedelta(minutes=settings.access_token_expire_minutes)
     payload = {"sub": str(user_id), "exp": expire}
-    return jwt.encode(payload, settings.secret_key, algorithm="HS256")
+    return jwt.encode(payload, settings.secret_key, algorithm=settings.algorithm)
 
 
-def create_refresh_token() -> str:
+def _create_refresh_token() -> str:
     return secrets.token_urlsafe(64)
 
 
-async def register_user(db: AsyncSession, username: str, email: str, password: str) -> dict:
-    existing_username = await db.execute(select(User).where(User.username == username))
-    existing_email = await db.execute(select(User).where(User.email == email))
-    if existing_username.scalar_one_or_none() or existing_email.scalar_one_or_none():
+async def _issue_tokens(db: AsyncSession, user_id: int) -> dict:
+    access_token = _create_access_token(user_id)
+    refresh_token = _create_refresh_token()
+    db.add(
+        RefreshToken(
+            user_id=user_id,
+            token=_hash_token(refresh_token),
+            expires_at=datetime.now(timezone.utc)
+                       + timedelta(days=settings.refresh_token_expire_days),
+        )
+    )
+
+    return {"access_token": access_token, "refresh_token": refresh_token}
+
+
+async def register_user(
+        db: AsyncSession, username: str, email: str, password: str, native_l: str, learning_l: str, learning_level: str
+) -> dict:
+    existing = await db.execute(
+        select(User).where(or_(User.username == username, User.email == email))
+    )
+    if existing.scalar_one_or_none():
         raise HTTPException(status_code=400, detail="User already exists")
 
-    user = User(username=username, email=email, hashed_password=hash_password(password))
+    user = User(username=username, email=email, hashed_password=_hash_password(password))
     db.add(user)
     await db.flush()
 
-    access_token = create_access_token(user.id)
-    refresh_token = create_refresh_token()
+    db.add(UserLanguage(user_id=user.id, language=native_l, level="native"))
+    db.add(UserLanguage(user_id=user.id, language=learning_l, level=learning_level))
 
-    db.add(
-        RefreshToken(
-            user_id=user.id,
-            token=refresh_token,
-            expires_at=datetime.now(timezone.utc) + timedelta(days=30),
-        )
-    )
-    await db.commit()
+    tokens = await _issue_tokens(db, user.id)
 
-    return {"access_token": access_token, "refresh_token": refresh_token, "user_id": user.id}
+    try:
+        await db.commit()
+    except IntegrityError:
+        await db.rollback()
+        raise HTTPException(status_code=400, detail="User already exists")
+
+    return {**tokens, "user_id": user.id}
 
 
 async def login_user(db: AsyncSession, username: str, password: str) -> dict:
     result = await db.execute(select(User).where(User.username == username))
     user = result.scalar_one_or_none()
 
-    if not user or not verify_password(password, user.hashed_password):
-        raise HTTPException(status_code=401, detail="Неверный логин или пароль")
+    if not user or not _verify_password(password, user.hashed_password):
+        raise HTTPException(status_code=401, detail="Incorrect username or password")
 
-    access_token = create_access_token(user.id)
-    refresh_token = create_refresh_token()
+    tokens = await _issue_tokens(db, user.id)
 
-    db.add(
-        RefreshToken(
-            user_id=user.id,
-            token=refresh_token,
-            expires_at=datetime.now(timezone.utc) + timedelta(days=30),
-        )
-    )
     await db.commit()
 
-    return {"access_token": access_token, "refresh_token": refresh_token, "user_id": user.id}
+    return {**tokens, "user_id": user.id}
 
 
 async def logout_user(db: AsyncSession, refresh_token: str) -> None:
     result = await db.execute(
-        select(RefreshToken).where(RefreshToken.token == refresh_token)
+        select(RefreshToken).where(RefreshToken.token == _hash_token(refresh_token))
     )
     token = result.scalar_one_or_none()
     if token:
@@ -97,7 +110,7 @@ async def logout_user(db: AsyncSession, refresh_token: str) -> None:
 
 async def refresh_tokens(db: AsyncSession, refresh_token: str) -> dict:
     result = await db.execute(
-        select(RefreshToken).where(RefreshToken.token == refresh_token)
+        select(RefreshToken).where(RefreshToken.token == _hash_token(refresh_token))
     )
     token = result.scalar_one_or_none()
 
@@ -107,22 +120,13 @@ async def refresh_tokens(db: AsyncSession, refresh_token: str) -> dict:
     if token.expires_at < datetime.now(timezone.utc):
         raise HTTPException(status_code=401, detail="Token expired")
 
+    user_id = token.user_id
     await db.delete(token)
+    tokens = await _issue_tokens(db, user_id)
+
     await db.commit()
 
-    new_refresh = create_refresh_token()
-    new_access = create_access_token(token.user_id)
-
-    db.add(
-        RefreshToken(
-            user_id=token.user_id,
-            token=new_refresh,
-            expires_at=datetime.now(timezone.utc) + timedelta(days=30),
-        )
-    )
-    await db.commit()
-
-    return {"access_token": new_access, "refresh_token": new_refresh}
+    return tokens
 
 
 async def get_current_user(
@@ -136,7 +140,7 @@ async def get_current_user(
     )
 
     try:
-        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        payload = jwt.decode(token, settings.secret_key, algorithms=[settings.algorithm])
         user_id_str = payload.get("sub")
         if user_id_str is None:
             raise credentials_exception
@@ -146,7 +150,7 @@ async def get_current_user(
 
     user = await db.get(User, user_id)
 
-    if user is None:
+    if user is None or not user.is_active:
         raise credentials_exception
 
     return user
