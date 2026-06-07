@@ -3,22 +3,34 @@ from sqlalchemy import select, or_, and_
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.db.models import Message, User
+from app.service.users import get_user_model
 
 
 class ConnectionManager:
     def __init__(self):
-        self.connections: dict[int, WebSocket] = {}
+        self.connections: dict[int, list[WebSocket]] = {}
 
     async def connect(self, user_id: int, websocket: WebSocket):
-        self.connections[user_id] = websocket
+        self.connections.setdefault(user_id, []).append(websocket)
 
-    def disconnect(self, user_id: int):
-        self.connections.pop(user_id, None)
+    def disconnect(self, user_id: int, websocket: WebSocket):
+        if user_id in self.connections:
+            try:
+                self.connections[user_id].remove(websocket)
+            except ValueError:
+                pass
+
+            if not self.connections[user_id]:
+                self.connections.pop(user_id)
+
 
     async def send_to_user(self, user_id: int, message: dict):
-        websocket = self.connections.get(user_id)
-        if websocket:
-            await websocket.send_json(message)
+        websockets = list(self.connections.get(user_id, []))
+        for websocket in websockets:
+            try:
+                await websocket.send_json(message)
+            except Exception:
+                self.disconnect(user_id, websocket)
 
     def is_online(self, user_id: int) -> bool:
         return user_id in self.connections
@@ -28,6 +40,11 @@ manager = ConnectionManager()
 
 
 async def save_message(db: AsyncSession, sender_id: int, receiver_id: int, text: str) -> Message:
+    existing_receiver = await get_user_model(db, sender_id)
+
+    if not existing_receiver:
+        raise Exception(f"User {sender_id} doesn't exist")
+
     message = Message(sender_id=sender_id, receiver_id=receiver_id, text=text)
     db.add(message)
     await db.commit()
