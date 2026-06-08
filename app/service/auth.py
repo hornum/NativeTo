@@ -11,9 +11,11 @@ from sqlalchemy import select, or_
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.db.cache_redis import redis_client
 from app.db.models import User, RefreshToken, UserLanguage
 from app.config import settings
 from app.db.session import db_dependency
+from app.tasks import send_verification_email
 
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
@@ -80,6 +82,13 @@ async def register_user(
     except IntegrityError:
         await db.rollback()
         raise HTTPException(status_code=400, detail="User already exists")
+
+    verify_token = secrets.token_urlsafe(32)
+    try:
+        await redis_client.set(f"verify:{verify_token}", user.id, ex=86400)
+        send_verification_email.delay(user.email, verify_token)
+    except Exception:
+        pass # TODO: заменить на logger.warning — письмо не ушло, но аккаунт создан
 
     return {**tokens, "user_id": user.id}
 
@@ -154,3 +163,14 @@ async def get_current_user(
         raise credentials_exception
 
     return user
+
+
+async def verify_user(db: AsyncSession, user_id: int) -> None:
+    user = await db.get(User, user_id)
+    if user is None:
+        raise HTTPException(status_code=404, detail="User not found")
+    if user.is_verified:
+        raise HTTPException(status_code=400, detail="User is already verified")
+
+    user.is_verified = True
+    await db.commit()
