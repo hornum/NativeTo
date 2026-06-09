@@ -30,6 +30,12 @@ async def websocket_endpoint(websocket: WebSocket, db: AsyncSession = Depends(ge
         await websocket.close(code=1008)
         return
 
+    user = await db.get(User, user_id)
+
+    if user is None or not user.is_active or not user.is_verified:
+        await websocket.close(code=1008)
+        return
+
     await manager.connect(user_id, websocket)
 
     try:
