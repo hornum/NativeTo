@@ -16,6 +16,7 @@ class Settings(BaseSettings):
     SECRET_KEY: str
     REDIS_URL: str
     BASE_URL: str = "http://localhost:8000"
+    LOG_LEVEL: str = "INFO"
 
     algorithm: str = "HS256"
     access_token_expire_minutes: int = 30

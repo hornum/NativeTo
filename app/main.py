@@ -1,4 +1,5 @@
 import uvicorn
+import logging
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
@@ -6,6 +7,9 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.api.v1.auth import router as auth_router
 from app.api.v1.chat import router as chat_router
 from app.api.v1.users import router as users_router
+from app.config import settings
+
+logging.basicConfig(level=getattr(logging, settings.LOG_LEVEL), format="%(asctime)s | %(levelname)s | %(name)s | %(message)s")
 
 app = FastAPI()
 

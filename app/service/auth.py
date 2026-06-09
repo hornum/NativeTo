@@ -1,4 +1,5 @@
 import hashlib
+import logging
 import secrets
 from datetime import datetime, timedelta, timezone
 from typing import Annotated
@@ -17,7 +18,7 @@ from app.config import settings
 from app.db.session import db_dependency
 from app.tasks import send_verification_email
 
-
+logger = logging.getLogger(__name__)
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 oauth2_bearer = OAuth2PasswordBearer(tokenUrl="/api/v1/auth/login")
 
@@ -88,7 +89,8 @@ async def register_user(
         await redis_client.set(f"verify:{verify_token}", user.id, ex=86400)
         send_verification_email.delay(user.email, verify_token)
     except Exception:
-        pass # TODO: заменить на logger.warning — письмо не ушло, но аккаунт создан
+        #TODO: При деплое сделать реальную отправку письма
+        logger.warning("Failed to send verification email for user_id=%s", user.id)
 
     return {**tokens, "user_id": user.id}
 
