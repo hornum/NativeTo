@@ -165,6 +165,12 @@ async def get_current_user(
     return user
 
 
+async def get_verified_user(user: Annotated[User, Depends(get_current_user)]) -> User:
+    if not user.is_verified:
+        raise HTTPException(status_code=403, detail="Email not verified")
+    return user
+
+
 async def verify_user(db: AsyncSession, user_id: int) -> None:
     user = await db.get(User, user_id)
     if user is None:
