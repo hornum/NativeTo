@@ -27,15 +27,26 @@ async def override_get_db():
 
 
 class FakeRedis:
-    async def set(self, *args, **kwargs): pass
-    async def get(self, *args, **kwargs): return None
-    async def delete(self, *args, **kwargs): pass
+    def __init__(self):
+        self._storage = {}
+
+    async def set(self, key, value, ex=None):
+        self._storage[key] = str(value)
+
+    async def get(self, key):
+        return self._storage.get(key)
+
+    async def delete(self, key):
+        self._storage.pop(key, None)
 
 
 @pytest.fixture(autouse=True)
-def no_external_services(monkeypatch):
-    monkeypatch.setattr(auth_service, "redis_client", FakeRedis())
+def fake_redis(monkeypatch):
+    fake = FakeRedis()
+    monkeypatch.setattr(auth_service, "redis_client", fake)
     monkeypatch.setattr(auth_service.send_verification_email, "delay", lambda *args, **kwargs: None)
+
+    return fake
 
 
 @pytest.fixture(autouse=True)

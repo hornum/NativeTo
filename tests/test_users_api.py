@@ -1,5 +1,7 @@
 from httpx import AsyncClient
 
+from tests.conftest import FakeRedis
+
 
 async def test_get_me_returns_profile(auth_client: AsyncClient):
     response = await auth_client.get("/api/v1/users/me")
@@ -74,3 +76,28 @@ async def test_patch_name_is_free(auth_client: AsyncClient, client: AsyncClient,
     response = await auth_client.patch("/api/v1/users/me", json={"name": "Anna"})
     assert response.status_code == 200, response.json()
     assert response.json()["name"] == "Anna", response.json()
+
+
+async def test_verify_flow(client: AsyncClient, fake_redis: FakeRedis, auth_json_data):
+    await client.post("/api/v1/auth/register", json=auth_json_data)
+    token = next(k.removeprefix("verify:") for k in fake_redis._storage if k.startswith("verify:"))
+    response = await client.get(f"/api/v1/auth/verify?token={token}")
+
+    assert response.status_code == 200, response.json()
+    assert f"verify:{token}" not in fake_redis._storage, response.json()
+
+
+async def test_verify_invalid_token_fails(client: AsyncClient):
+    response = await client.get(f"/api/v1/auth/verify?token=invalid")
+    assert response.status_code == 401, response.json()
+
+
+async def test_verify_twice_fails(client: AsyncClient, fake_redis: FakeRedis, auth_json_data):
+    await client.post("/api/v1/auth/register", json=auth_json_data)
+    token = next(k.removeprefix("verify:") for k in fake_redis._storage if k.startswith("verify:"))
+
+    response = await client.get(f"/api/v1/auth/verify?token={token}")
+    assert response.status_code == 200, response.json()
+
+    response = await client.get(f"/api/v1/auth/verify?token={token}")
+    assert response.status_code == 401, response.json()
