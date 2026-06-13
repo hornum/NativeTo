@@ -182,4 +182,16 @@ async def verify_user(db: AsyncSession, user_id: int) -> None:
         raise HTTPException(status_code=400, detail="User is already verified")
 
     user.is_verified = True
+
+
+
+async def verify_email_token(db: AsyncSession, token: str) -> None:
+    verification_uid = await redis_client.get(f"verify:{token}")
+    if verification_uid is None:
+        raise HTTPException(401, detail="Invalid verification token")
+
+    user_id = int(verification_uid)
+    await verify_user(db, user_id)
     await db.commit()
+    await redis_client.delete(f"verify:{token}")
+

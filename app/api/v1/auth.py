@@ -6,7 +6,7 @@ from fastapi.security import OAuth2PasswordRequestForm
 from app.db.cache_redis import redis_client
 from app.db.session import db_dependency
 from app.schemas.auth import UserRegister, TokenResponse, RefreshRequest, TokenPair
-from app.service.auth import register_user, refresh_tokens, logout_user, login_user, verify_user
+from app.service.auth import register_user, refresh_tokens, logout_user, login_user, verify_email_token
 
 router = APIRouter(prefix="/api/v1/auth", tags=["Auth"])
 
@@ -46,11 +46,5 @@ async def logout(body: RefreshRequest, db: db_dependency):
 
 @router.get("/verify")
 async def verify(db: db_dependency, token: str) -> dict:
-    verification_uid = await redis_client.get(f"verify:{token}")
-    if verification_uid is None:
-        raise HTTPException(401, detail="Invalid verification token")
-
-    user_id = int(verification_uid)
-    await verify_user(db, user_id)
-    await redis_client.delete(f"verify:{token}")
+    await verify_email_token(db, token)
     return {"message": "Email verified"}
