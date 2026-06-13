@@ -67,6 +67,7 @@ async def client():
 def auth_json_data():
     return {
         "username": "testuser",
+        "name": "John Doe",
         "password": "testpassword",
         "native_language": "English",
         "learning_language": "Russian",

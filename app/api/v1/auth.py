@@ -16,6 +16,7 @@ async def register(db: db_dependency, data: UserRegister):
     return await register_user(
         db=db,
         username=data.username,
+        name=data.name,
         email=str(data.email),
         password=data.password,
         native_l=data.native_language,

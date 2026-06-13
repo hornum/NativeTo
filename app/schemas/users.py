@@ -24,6 +24,7 @@ class AddLanguage(BaseModel):
 class UserProfile(BaseModel):
     id: int
     username: str
+    name: str
     email: str
     bio: str | None = None
     country: str | None = None
@@ -33,6 +34,7 @@ class UserProfile(BaseModel):
 
 class EditUserProfile(BaseModel):
     username: str | None = None
+    name: str | None = None
     bio: str | None = None
     country: str | None = None
     age: int | None = None

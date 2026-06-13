@@ -16,6 +16,7 @@ user_dependency = Annotated[User, Depends(get_current_user)]
 async def get_me(db: db_dependency, curr_user: user_dependency) -> UserProfile:
     return await get_user_with_langs(db, curr_user.id)
 
+
 @router.patch("/me")
 async def patch_me(db: db_dependency, curr_user: user_dependency, data: EditUserProfile) -> UserProfile:
     return await patch_user_data(db, curr_user.id, data.model_dump(exclude_none=True))

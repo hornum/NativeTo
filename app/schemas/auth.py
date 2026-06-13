@@ -3,6 +3,7 @@ from pydantic import BaseModel, EmailStr
 
 class UserRegister(BaseModel):
     username: str
+    name: str
     password: str
     native_language: str
     learning_language: str
