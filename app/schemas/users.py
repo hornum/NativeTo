@@ -26,6 +26,7 @@ class UserProfile(BaseModel):
     username: str
     name: str
     email: str
+    avatar_url: str | None = None
     bio: str | None = None
     country: str | None = None
     age: int | None = None

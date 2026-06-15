@@ -10,7 +10,8 @@ from app.schemas.users import UserProfile, UserLanguageSchema, UserLanguageLevel
 
 def build_profile(user: User) -> UserProfile:
     return UserProfile(
-        id=user.id, username=user.username, name=user.name, email=user.email,
+        id=user.id, username=user.username, name=user.name,
+        email=user.email, avatar_url=user.avatar_url,
         bio=user.bio, country=user.country, age=user.age,
         languages=[UserLanguageSchema(id=l.id, language=l.language, level=l.level) for l in user.languages]
     )
@@ -36,35 +37,6 @@ async def get_user_with_langs(db: AsyncSession, user_id: int) -> UserProfile | N
         return None
 
     return build_profile(user)
-
-
-async def get_users_catalog(db: AsyncSession, user_id: int) -> list[UserProfile]:
-    me = await get_user_with_langs(db, user_id)
-
-    if me is None:
-        raise HTTPException(status_code=404, detail="User not found")
-
-    my_native = [l.language for l in me.languages if l.level == "native"]
-    my_learning = [l.language for l in me.languages if l.level != "native"]
-
-    if not my_native and not my_learning:
-        return []
-
-    result = await db.execute(
-        select(User)
-        .options(joinedload(User.languages))
-        .join(User.languages)
-        .where(
-            User.id != user_id,
-            or_(
-                and_(UserLanguage.level != "native", UserLanguage.language.in_(my_native)),
-                and_(UserLanguage.level == "native", UserLanguage.language.in_(my_learning)),
-            )
-        )
-        .distinct()
-    )
-    users = result.unique().scalars().all()
-    return [build_profile(u) for u in users]
 
 
 async def delete_user_lang(db: AsyncSession, user_id: int, lang_id: int) -> None:

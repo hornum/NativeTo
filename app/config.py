@@ -21,6 +21,12 @@ class Settings(BaseSettings):
     ONLINE_TTL: int = 30
     LAST_SEEN_TTL: int = 31536000
 
+    MINIO_ENDPOINT: str = "minio:9000"
+    MINIO_ROOT_USER: str
+    MINIO_ROOT_PASSWORD: str
+    MINIO_BUCKET: str = "avatars"
+    MINIO_PUBLIC_URL: str = "http://localhost:9000"
+
     algorithm: str = "HS256"
     access_token_expire_minutes: int = 30
     refresh_token_expire_days: int = 30
