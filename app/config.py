@@ -13,10 +13,13 @@ class Settings(BaseSettings):
     DB_HOST: str
     DB_PORT: int
     DB_NAME: str
+
     SECRET_KEY: str
     REDIS_URL: str
     BASE_URL: str = "http://localhost:8000"
     LOG_LEVEL: str = "INFO"
+    ONLINE_TTL: int = 30
+    LAST_SEEN_TTL: int = 31536000
 
     algorithm: str = "HS256"
     access_token_expire_minutes: int = 30

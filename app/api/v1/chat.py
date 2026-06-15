@@ -9,6 +9,7 @@ from app.schemas.chat import IncomingMessage
 from app.service.chat import manager, save_message, get_chat_history
 from app.service.auth import get_current_user
 from app.db.models import User
+from app.service.presence import mark_online, mark_offline
 
 router = APIRouter(prefix="/api/v1/chat",tags=["Chat"])
 
@@ -38,9 +39,12 @@ async def websocket_endpoint(websocket: WebSocket, db: AsyncSession = Depends(ge
 
     await manager.connect(user_id, websocket)
 
+    await mark_online(user_id)
+
     try:
         while True:
             data = await websocket.receive_json()
+            await mark_online(user_id)
 
             try:
                 msg = IncomingMessage(**data)
@@ -69,6 +73,8 @@ async def websocket_endpoint(websocket: WebSocket, db: AsyncSession = Depends(ge
 
     except WebSocketDisconnect:
         manager.disconnect(user_id, websocket)
+        if not manager.is_online(user_id):
+            await mark_offline(user_id)
 
 
 @router.get("/history/{other_user_id}")

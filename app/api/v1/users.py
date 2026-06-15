@@ -6,6 +6,7 @@ from app.db.models import User
 from app.db.session import db_dependency
 from app.schemas.users import UserProfile, UserLanguageSchema, EditUserProfile, AddLanguage
 from app.service.auth import get_current_user
+from app.service.presence import get_status
 from app.service.users import get_user_with_langs, get_users_catalog, patch_user_data, add_language, delete_user_lang
 
 router = APIRouter(prefix="/api/v1/users", tags=["Users"])
@@ -33,3 +34,8 @@ async def add_user_language(db: db_dependency, curr_user: user_dependency, lang:
 @router.delete("/me/languages", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_user_language(db: db_dependency, curr_user: user_dependency, lang_id: int):
     await delete_user_lang(db, curr_user.id, lang_id)
+
+
+@router.get("/{user_id}/status")
+async def user_status(user_id: int, curr_user: user_dependency):
+    return await get_status(user_id)
