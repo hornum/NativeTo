@@ -11,6 +11,11 @@ from app.service.users import get_user_with_langs, build_profile
 async def get_users_catalog(
         db: AsyncSession,
         user_id: int,
+        country: str | None = None,
+        min_age: int | None = None,
+        max_age: int | None = None,
+        limit: int = 20,
+        offset: int = 0,
         ) -> list[UserProfile]:
     me = await get_user_with_langs(db, user_id)
 
@@ -23,7 +28,7 @@ async def get_users_catalog(
     if not my_native and not my_learning:
         return []
 
-    result = await db.execute(
+    query = (
         select(User)
         .options(joinedload(User.languages))
         .join(User.languages)
@@ -34,7 +39,16 @@ async def get_users_catalog(
                 and_(UserLanguage.level == "native", UserLanguage.language.in_(my_learning)),
             )
         )
-        .distinct()
     )
+    if country is not None:
+        query = query.where(User.country == country)
+    if min_age is not None:
+        query = query.where(User.age >= min_age)
+    if max_age is not None:
+        query = query.where(User.age <= max_age)
+
+    query = query.distinct().limit(limit).offset(offset)
+
+    result = await db.execute(query)
     users = result.unique().scalars().all()
     return [build_profile(u) for u in users]
