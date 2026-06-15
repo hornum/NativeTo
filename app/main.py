@@ -5,12 +5,16 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
 
+from slowapi import _rate_limit_exceeded_handler
+from slowapi.errors import RateLimitExceeded
+
 from app.api.v1.auth import router as auth_router
 from app.api.v1.chat import router as chat_router
 from app.api.v1.users import router as users_router
 from app.api.v1.catalog import router as catalog_router
 from app.db.s3 import ensure_avatar_bucket
 from app.config import settings
+from app.limiter import limiter
 
 logging.basicConfig(level=getattr(logging, settings.LOG_LEVEL), format="%(asctime)s | %(levelname)s | %(name)s | %(message)s")
 
@@ -33,6 +37,9 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+app.state.limiter = limiter
+app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
 
 

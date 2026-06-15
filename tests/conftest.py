@@ -5,6 +5,7 @@ from httpx import AsyncClient, ASGITransport
 from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker
 from sqlalchemy.pool.impl import NullPool
 
+from app.limiter import limiter
 from app.main import app
 from app.db.session import get_db, Base
 from app.service import auth as auth_service
@@ -52,6 +53,13 @@ def fake_redis(monkeypatch):
 @pytest.fixture(autouse=True)
 def fast_password_hashing(monkeypatch):
     monkeypatch.setattr(auth_service, "pwd_context", fast_pwd_context)
+
+
+@pytest.fixture(autouse=True)
+def disable_rate_limit(monkeypatch):
+    limiter.enabled = False
+    yield
+    limiter.enabled = True
 
 
 @pytest_asyncio.fixture(autouse=True)

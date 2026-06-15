@@ -1,18 +1,19 @@
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, Request
 from fastapi.security import OAuth2PasswordRequestForm
 
-from app.db.cache_redis import redis_client
 from app.db.session import db_dependency
 from app.schemas.auth import UserRegister, TokenResponse, RefreshRequest, TokenPair
 from app.service.auth import register_user, refresh_tokens, logout_user, login_user, verify_email_token
+from app.limiter import limiter
 
 router = APIRouter(prefix="/api/v1/auth", tags=["Auth"])
 
 
 @router.post("/register", response_model=TokenResponse)
-async def register(db: db_dependency, data: UserRegister):
+@limiter.limit("5/minute")
+async def register(db: db_dependency, data: UserRegister, request: Request):
     return await register_user(
         db=db,
         username=data.username,
@@ -26,9 +27,11 @@ async def register(db: db_dependency, data: UserRegister):
 
 
 @router.post("/login", response_model=TokenResponse)
+@limiter.limit("5/minute")
 async def login(
     data: Annotated[OAuth2PasswordRequestForm, Depends()],
     db: db_dependency,
+    request: Request,
 ):
     return await login_user(db, data.username, data.password)
 
