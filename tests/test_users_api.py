@@ -55,7 +55,7 @@ async def test_catalog_matches_languages(auth_client: AsyncClient, client: Async
                    "native_language": "Russian", "learning_language": "English"}
     await client.post("/api/v1/auth/register", json=partner_match)
 
-    response = await auth_client.get("/api/v1/users/catalog")
+    response = await auth_client.get("/api/v1/catalog/")
     assert response.status_code == 200, response.json()
     data = response.json()
     assert len(data) == 1, response.json()
@@ -64,7 +64,7 @@ async def test_catalog_matches_languages(auth_client: AsyncClient, client: Async
                    "native_language": "Korean", "learning_language": "Arabic"}
     await client.post("/api/v1/auth/register", json=partner_nomatch)
 
-    response = await auth_client.get("/api/v1/users/catalog")
+    response = await auth_client.get("/api/v1/catalog/")
     data = response.json()
     assert len(data) == 1, response.json()
 
