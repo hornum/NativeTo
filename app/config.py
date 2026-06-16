@@ -27,6 +27,8 @@ class Settings(BaseSettings):
     MINIO_BUCKET: str = "avatars"
     MINIO_PUBLIC_URL: str = "http://localhost:9000"
 
+    CORS_ORIGINS: list[str] = ["http://localhost:8000", "http://localhost:3000"]
+
     algorithm: str = "HS256"
     access_token_expire_minutes: int = 30
     refresh_token_expire_days: int = 30
