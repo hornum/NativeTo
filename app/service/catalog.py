@@ -4,19 +4,12 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import joinedload
 
 from app.db.models import User, UserLanguage
+from app.schemas.catalog import CatalogFilters
 from app.schemas.users import UserProfile
 from app.service.users import get_user_with_langs, build_profile
 
 
-async def get_users_catalog(
-        db: AsyncSession,
-        user_id: int,
-        country: str | None = None,
-        min_age: int | None = None,
-        max_age: int | None = None,
-        limit: int = 20,
-        offset: int = 0,
-        ) -> list[UserProfile]:
+async def get_users_catalog(db: AsyncSession, user_id: int, filters: CatalogFilters) -> list[UserProfile]:
     me = await get_user_with_langs(db, user_id)
 
     if me is None:
@@ -40,14 +33,14 @@ async def get_users_catalog(
             )
         )
     )
-    if country is not None:
-        query = query.where(User.country == country)
-    if min_age is not None:
-        query = query.where(User.age >= min_age)
-    if max_age is not None:
-        query = query.where(User.age <= max_age)
+    if filters.country is not None:
+        query = query.where(User.country == filters.country)
+    if filters.min_age is not None:
+        query = query.where(User.age >= filters.min_age)
+    if filters.max_age is not None:
+        query = query.where(User.age <= filters.max_age)
 
-    query = query.distinct().limit(limit).offset(offset)
+    query = query.distinct().limit(filters.limit).offset(filters.offset)
 
     result = await db.execute(query)
     users = result.unique().scalars().all()
