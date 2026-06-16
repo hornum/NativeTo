@@ -1,3 +1,4 @@
+import asyncio
 import hashlib
 import logging
 import secrets
@@ -23,16 +24,16 @@ pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 oauth2_bearer = OAuth2PasswordBearer(tokenUrl="/api/v1/auth/login")
 
 
-def _hash_password(password: str) -> str:
-    return pwd_context.hash(password)
+async def _hash_password(password: str) -> str:
+    return await asyncio.to_thread(pwd_context.hash, password)
 
 
 def _hash_token(token: str) -> str:
     return hashlib.sha256(token.encode()).hexdigest()
 
 
-def _verify_password(plain: str, hashed: str) -> bool:
-    return pwd_context.verify(plain, hashed)
+async def _verify_password(plain: str, hashed: str) -> bool:
+    return await asyncio.to_thread(pwd_context.verify, plain, hashed)
 
 
 def _create_access_token(user_id: int) -> str:
@@ -70,7 +71,7 @@ async def register_user(
     if existing.scalar_one_or_none():
         raise HTTPException(status_code=400, detail="User already exists")
 
-    user = User(username=username, name=name, email=email, hashed_password=_hash_password(password))
+    user = User(username=username, name=name, email=email, hashed_password=await _hash_password(password))
     db.add(user)
     await db.flush()
 
@@ -100,7 +101,7 @@ async def login_user(db: AsyncSession, username: str, password: str) -> dict:
     result = await db.execute(select(User).where(User.username == username))
     user = result.scalar_one_or_none()
 
-    if not user or not _verify_password(password, user.hashed_password):
+    if not user or not await _verify_password(password, user.hashed_password):
         raise HTTPException(status_code=401, detail="Incorrect username or password")
 
     tokens = await _issue_tokens(db, user.id)
