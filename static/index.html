@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NativeTo — language partners</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --night:#141B2E; --night-2:#1C2540; --paper:#F7F4EF;
+  --coral:#FF6B5C; --teal:#36C5B0; --gold:#F2C66D;
+  --ink:#222838; --muted:#8A93AB; --line:rgba(255,255,255,.08);
+  --radius:14px;
+  --display:'Space Grotesk',sans-serif; --body:'Inter',sans-serif; --mono:'JetBrains Mono',monospace;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;font-family:var(--body);background:var(--night);color:var(--paper);-webkit-font-smoothing:antialiased;line-height:1.5}
+header{position:relative;overflow:hidden;border-bottom:1px solid var(--line);padding:38px 24px 30px}
+#constellation{position:absolute;inset:0;width:100%;height:100%;opacity:.55}
+.head-inner{position:relative;max-width:1180px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;gap:20px;flex-wrap:wrap}
+.brand{display:flex;align-items:baseline;gap:12px}
+.brand h1{font-family:var(--display);font-weight:700;font-size:30px;letter-spacing:-.02em;margin:0}
+.brand .dot{color:var(--coral)}
+.brand .sub{font-family:var(--mono);font-size:12px;color:var(--teal);letter-spacing:.04em}
+.api-state{display:flex;align-items:center;gap:10px;font-family:var(--mono);font-size:12px;color:var(--muted)}
+.api-state input{background:var(--night-2);border:1px solid var(--line);color:var(--paper);font-family:var(--mono);font-size:12px;padding:7px 10px;border-radius:8px;width:200px}
+.pill{display:inline-flex;align-items:center;gap:6px;padding:3px 9px;border-radius:999px;font-size:11px;font-family:var(--mono)}
+.pill .bulb{width:7px;height:7px;border-radius:50%;background:var(--muted)}
+.pill.on{background:rgba(54,197,176,.13);color:var(--teal)} .pill.on .bulb{background:var(--teal)}
+.pill.off{background:rgba(255,107,92,.13);color:var(--coral)} .pill.off .bulb{background:var(--coral)}
+main{max-width:1180px;margin:0 auto;padding:26px 24px 80px}
+.who{font-family:var(--mono);font-size:13px;color:var(--muted);margin-bottom:18px}
+.who b{color:var(--gold)}
+.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:18px}
+@media(max-width:880px){.grid{grid-template-columns:1fr}}
+.card{background:var(--paper);color:var(--ink);border-radius:var(--radius);padding:20px;box-shadow:0 1px 0 rgba(255,255,255,.04),0 16px 40px -28px rgba(0,0,0,.6)}
+.card h2{font-family:var(--display);font-weight:600;font-size:17px;margin:0 0 3px;letter-spacing:-.01em}
+.card .hint{font-size:12.5px;color:#6c7587;margin:0 0 15px}
+.card.span2{grid-column:1/-1}
+label{display:block;font-size:12px;font-weight:600;color:#5a6275;margin:11px 0 5px}
+input,select,textarea{width:100%;font-family:var(--body);font-size:14px;color:var(--ink);background:#fff;border:1px solid #E3DDD2;border-radius:9px;padding:9px 11px;outline:none;transition:border-color .15s,box-shadow .15s}
+input:focus,select:focus,textarea:focus{border-color:var(--teal);box-shadow:0 0 0 3px rgba(54,197,176,.16)}
+.row{display:flex;gap:10px}.row>*{flex:1}
+button{font-family:var(--display);font-weight:500;font-size:14px;cursor:pointer;border:none;border-radius:9px;padding:10px 15px;background:var(--ink);color:#fff;transition:transform .08s,background .15s}
+button:hover{background:#000}button:active{transform:translateY(1px)}
+button.accent{background:var(--coral)}button.accent:hover{background:#ff5949}
+button.teal{background:var(--teal)}button.teal:hover{background:#2bb09c}
+button.ghost{background:transparent;color:var(--ink);border:1px solid #D9D2C6}button.ghost:hover{background:#EFEAE0}
+button.sm{padding:6px 11px;font-size:12.5px}
+.btnrow{display:flex;gap:9px;flex-wrap:wrap;margin-top:14px}
+.out{font-family:var(--mono);font-size:12px;background:var(--night-2);color:#C6CFE6;border-radius:9px;padding:11px;margin-top:13px;white-space:pre-wrap;word-break:break-word;max-height:200px;overflow:auto;border:1px solid var(--line)}
+.out:empty{display:none}
+.tag{display:inline-block;font-family:var(--mono);font-size:11px;background:rgba(242,198,109,.16);color:#a37d1b;padding:2px 8px;border-radius:6px;margin-left:7px;vertical-align:middle}
+.tokens{display:flex;gap:14px;flex-wrap:wrap;font-family:var(--mono);font-size:11.5px;color:var(--muted);margin-bottom:16px}
+.tokens span b{color:var(--teal)}
+.filters{display:flex;gap:9px;flex-wrap:wrap;align-items:flex-end;margin-bottom:6px}
+.filters>div{flex:1;min-width:120px}
+.people{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px;margin-top:15px}
+.person{border:1px solid #EAE4D8;border-radius:12px;padding:13px;display:flex;flex-direction:column;gap:8px;background:#fff}
+.person .top{display:flex;align-items:center;gap:10px}
+.avatar{position:relative;width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,var(--teal),var(--coral));display:flex;align-items:center;justify-content:center;font-family:var(--display);font-weight:700;color:#fff;font-size:16px;flex-shrink:0}
+.presence-dot{position:absolute;bottom:-1px;right:-1px;width:12px;height:12px;border-radius:50%;border:2px solid #fff;background:var(--muted)}
+.presence-dot.online{background:#3ECf8e}
+.person .nm{font-family:var(--display);font-weight:600;font-size:14.5px;line-height:1.15}
+.person .uname{font-family:var(--mono);font-size:11px;color:#9aa0ad}
+.person .meta{font-size:12px;color:#6c7587}
+.person .seen{font-family:var(--mono);font-size:10.5px;color:#9aa0ad}
+.langline{display:flex;gap:5px;flex-wrap:wrap}
+.lng{font-family:var(--mono);font-size:10.5px;padding:2px 7px;border-radius:6px;background:#F1ECE2;color:#5a6275}
+.lng.nat{background:rgba(54,197,176,.16);color:#1f8576}
+.chat-head{display:flex;align-items:center;gap:10px;padding:10px 13px;background:var(--night-2);border-radius:11px 11px 0 0;border:1px solid var(--line);border-bottom:none}
+.chat-head .nm{font-family:var(--display);font-weight:600;font-size:14px;color:var(--paper)}
+.chat-head .st{font-family:var(--mono);font-size:11px;color:var(--muted);margin-left:auto}
+.messages{height:300px;overflow-y:auto;background:#fff;border:1px solid #E3DDD2;border-top:none;padding:14px;display:flex;flex-direction:column;gap:8px}
+.msg{max-width:74%;padding:8px 12px;border-radius:13px;font-size:13.5px;line-height:1.45;word-break:break-word}
+.msg.in{background:#F1ECE2;color:var(--ink);align-self:flex-start;border-bottom-left-radius:4px}
+.msg.out{background:var(--coral);color:#fff;align-self:flex-end;border-bottom-right-radius:4px}
+.msg .t{display:block;font-family:var(--mono);font-size:9.5px;opacity:.6;margin-top:3px}
+.msg.sys{align-self:center;background:rgba(242,198,109,.18);color:#8a6d18;font-family:var(--mono);font-size:11.5px;max-width:90%;text-align:center}
+.chat-input{display:flex;gap:8px;padding:11px;background:#fff;border:1px solid #E3DDD2;border-top:none;border-radius:0 0 11px 11px}
+.chat-input input{flex:1}
+.foot{font-family:var(--mono);font-size:11px;color:var(--muted);text-align:center;margin-top:34px;line-height:1.7}
+.foot a{color:var(--teal);text-decoration:none}
+::-webkit-scrollbar{width:9px;height:9px}::-webkit-scrollbar-thumb{background:#cfd6e6;border-radius:9px}
+.messages::-webkit-scrollbar-thumb{background:#ddd6ca}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<header>
+  <canvas id="constellation"></canvas>
+  <div class="head-inner">
+    <div class="brand">
+      <h1>Native<span class="dot">To</span></h1>
+      <span class="sub">// language partners, in real time</span>
+    </div>
+    <div class="api-state">
+      <span>API</span>
+      <input id="apiBase" value="http://localhost:8000" spellcheck="false">
+      <span id="apiPill" class="pill off"><span class="bulb"></span><span id="apiPillText">checking…</span></span>
+    </div>
+  </div>
+</header>
+
+<main>
+  <div class="who">Сессия: <b id="whoami">не авторизован</b></div>
+  <div class="tokens" id="tokenBar" style="display:none">
+    <span>access: <b id="tAccess">—</b></span>
+    <span>refresh: <b id="tRefresh">—</b></span>
+    <span>user_id: <b id="tUid">—</b></span>
+  </div>
+
+  <div class="grid">
+
+    <section class="card">
+      <h2>Регистрация</h2>
+      <p class="hint">name — отображаемое имя (обязательное, неуникальное). username — логин (уникальный).</p>
+      <div class="row">
+        <div><label>Username (логин)</label><input id="rUser" value="anna"></div>
+        <div><label>Name (имя)</label><input id="rName" value="Anna K."></div>
+      </div>
+      <label>Email</label><input id="rEmail" value="anna@example.com">
+      <label>Пароль</label><input id="rPass" type="password" value="secret123">
+      <div class="row">
+        <div><label>Родной язык</label><input id="rNative" value="Russian"></div>
+        <div><label>Изучаемый</label><input id="rLearn" value="English"></div>
+      </div>
+      <label>Уровень изучаемого</label>
+      <select id="rLevel"><option>beginner</option><option>intermediate</option><option>advanced</option></select>
+      <div class="btnrow"><button class="accent" onclick="register()">Зарегистрироваться</button></div>
+      <div class="out" id="oReg"></div>
+    </section>
+
+    <section class="card">
+      <h2>Вход</h2>
+      <p class="hint">OAuth2-форма: username / password.</p>
+      <label>Username</label><input id="lUser" value="anna">
+      <label>Пароль</label><input id="lPass" type="password" value="secret123">
+      <div class="btnrow">
+        <button onclick="login()">Войти</button>
+        <button class="ghost" onclick="refresh()">Обновить токен</button>
+        <button class="ghost" onclick="logout()">Выйти</button>
+      </div>
+      <div class="out" id="oLogin"></div>
+    </section>
+
+    <section class="card">
+      <h2>Подтверждение почты</h2>
+      <p class="hint">Ссылку печатает воркер Celery в логах. Вставь token сюда.</p>
+      <label>Verify token</label><input id="vToken" placeholder="token из ссылки в логах celery">
+      <div class="btnrow"><button class="teal" onclick="verify()">Подтвердить</button></div>
+      <div class="out" id="oVerify"></div>
+    </section>
+
+    <section class="card">
+      <h2>Профиль <span class="tag">GET/PATCH /users/me</span></h2>
+      <p class="hint">name меняется свободно. Аватар — заглушка под MinIO.</p>
+      <div class="row" style="align-items:center">
+        <div style="flex:0 0 auto"><div class="avatar" id="meAvatar" style="width:54px;height:54px;font-size:21px">?</div></div>
+        <div>
+          <button class="ghost sm" onclick="alert('Заглушка: загрузка аватара в MinIO -> PUT /users/me/avatar')">Загрузить аватар</button>
+          <div style="font-size:11px;color:#9aa0ad;margin-top:6px;font-family:var(--mono)">// avatar_url пока null</div>
+        </div>
+      </div>
+      <label>Name (отображаемое имя)</label><input id="pName">
+      <div class="row"><div><label>Bio</label><input id="pBio"></div><div><label>Страна</label><input id="pCountry"></div></div>
+      <label>Возраст</label><input id="pAge" type="number">
+      <div class="btnrow">
+        <button onclick="loadMe()">Загрузить /me</button>
+        <button class="accent" onclick="patchMe()">Сохранить</button>
+      </div>
+      <div class="out" id="oMe"></div>
+    </section>
+
+    <section class="card">
+      <h2>Мои языки <span class="tag">/users/me/languages</span></h2>
+      <p class="hint">Один native, дубли запрещены — инварианты бэкенда.</p>
+      <div class="row">
+        <div><label>Язык</label><input id="addLang" value="Spanish"></div>
+        <div><label>Уровень</label><select id="addLevel"><option>native</option><option>beginner</option><option>intermediate</option><option>advanced</option></select></div>
+      </div>
+      <div class="btnrow"><button class="teal" onclick="addLang()">Добавить</button></div>
+      <div id="myLangs" class="langline" style="margin-top:14px"></div>
+      <div class="out" id="oLang"></div>
+    </section>
+
+    <section class="card">
+      <h2>Онлайн-статус <span class="tag">GET /users/{id}/status</span></h2>
+      <p class="hint">online живёт по TTL — heartbeat при каждом сообщении в чате. last_seen — когда был в сети.</p>
+      <div class="row" style="align-items:flex-end">
+        <div><label>User ID</label><input id="stId" type="number" placeholder="чей статус"></div>
+        <div style="flex:0 0 auto"><button class="teal" onclick="checkStatus()">Проверить</button></div>
+      </div>
+      <div class="out" id="oStatus"></div>
+    </section>
+
+    <section class="card span2">
+      <h2>Каталог собеседников <span class="tag">GET /users/catalog</span></h2>
+      <p class="hint">Подбор: «мой изучаемый = их родной». Зелёная точка = онлайн (тянется из /status). Фильтры клиентские.</p>
+      <div class="filters">
+        <div><label>Язык <span style="color:#bbb">(client)</span></label><input id="fLang" placeholder="English"></div>
+        <div><label>Страна <span style="color:#bbb">(client)</span></label><input id="fCountry" placeholder="Spain"></div>
+        <div style="flex:0 0 auto"><button onclick="loadCatalog()">Обновить каталог</button></div>
+      </div>
+      <div class="people" id="people"></div>
+      <div class="out" id="oCatalog"></div>
+    </section>
+
+    <section class="card span2">
+      <h2>Чат <span class="tag">WS /chat/ws</span></h2>
+      <p class="hint">Первое сообщение — {token}. Неверифицированных бэкенд закрывает кодом 1008. Каждое сообщение продлевает online-статус.</p>
+      <div class="row" style="align-items:flex-end">
+        <div style="flex:2"><label>ID собеседника (receiver_id)</label><input id="peerId" type="number" placeholder="кому пишем"></div>
+        <div style="flex:0 0 auto"><button class="teal" onclick="wsConnect()">Подключиться</button></div>
+        <div style="flex:0 0 auto"><button class="ghost" onclick="loadHistory()">История</button></div>
+        <div style="flex:0 0 auto"><button class="ghost" onclick="wsClose()">Отключиться</button></div>
+      </div>
+      <div style="margin-top:14px">
+        <div class="chat-head">
+          <div class="avatar" id="peerAvatar" style="width:30px;height:30px;font-size:13px">·</div>
+          <span class="nm" id="peerName">собеседник не выбран</span>
+          <span class="st" id="wsState">disconnected</span>
+        </div>
+        <div class="messages" id="messages"></div>
+        <div class="chat-input">
+          <input id="msgText" placeholder="Сообщение…" onkeydown="if(event.key==='Enter')wsSend()">
+          <button class="accent" onclick="wsSend()">Отправить</button>
+        </div>
+      </div>
+    </section>
+
+  </div>
+
+  <div class="foot">
+    NativeTo dev console · <a id="docsLink" href="#" target="_blank">/docs</a> для Swagger<br>
+    панель тестировщика — не продакшн-фронт
+  </div>
+</main>
+
+<script>
+const S = { access:null, refresh:null, uid:null, ws:null };
+const $ = id => document.getElementById(id);
+const base = () => $('apiBase').value.replace(/\/+$/,'');
+function show(el,data,ok=true){const e=$(el);e.textContent=typeof data==='string'?data:JSON.stringify(data,null,2);e.style.color=ok?'#C6CFE6':'#ff9b90';}
+function authHeaders(){return S.access?{'Authorization':'Bearer '+S.access}:{};}
+
+async function api(path,{method='GET',json,form,auth=false}={}){
+  const opt={method,headers:{}};
+  if(auth)Object.assign(opt.headers,authHeaders());
+  if(json){opt.headers['Content-Type']='application/json';opt.body=JSON.stringify(json);}
+  if(form){opt.body=new URLSearchParams(form);}
+  const r=await fetch(base()+path,opt);
+  let body; try{body=await r.json();}catch{body=await r.text();}
+  if(!r.ok) throw {status:r.status,body};
+  return body;
+}
+
+function setSession(d){
+  S.access=d.access_token; S.refresh=d.refresh_token; S.uid=d.user_id??S.uid;
+  $('whoami').textContent=S.uid?('user_id '+S.uid):'авторизован';
+  $('tokenBar').style.display='flex';
+  $('tAccess').textContent=S.access?S.access.slice(0,16)+'…':'—';
+  $('tRefresh').textContent=S.refresh?S.refresh.slice(0,12)+'…':'—';
+  $('tUid').textContent=S.uid??'—';
+  if(S.uid)$('stId').value=S.uid;
+}
+
+async function register(){
+  try{
+    const d=await api('/api/v1/auth/register',{method:'POST',json:{
+      username:$('rUser').value, name:$('rName').value, email:$('rEmail').value, password:$('rPass').value,
+      native_language:$('rNative').value, learning_language:$('rLearn').value, learning_level:$('rLevel').value
+    }});
+    setSession(d); show('oReg',{registered:true,...d});
+  }catch(e){show('oReg',e,false);}
+}
+async function login(){
+  try{const d=await api('/api/v1/auth/login',{method:'POST',form:{username:$('lUser').value,password:$('lPass').value}});setSession(d);show('oLogin',{logged_in:true,...d});}
+  catch(e){show('oLogin',e,false);}
+}
+async function refresh(){
+  try{const d=await api('/api/v1/auth/refresh',{method:'POST',json:{refresh_token:S.refresh}});setSession(d);show('oLogin',{refreshed:true,...d});}
+  catch(e){show('oLogin',e,false);}
+}
+async function logout(){
+  try{const d=await api('/api/v1/auth/logout',{method:'POST',json:{refresh_token:S.refresh}});S.access=S.refresh=null;$('whoami').textContent='не авторизован';show('oLogin',d);}
+  catch(e){show('oLogin',e,false);}
+}
+async function verify(){
+  try{const d=await api('/api/v1/auth/verify?token='+encodeURIComponent($('vToken').value));show('oVerify',d);}
+  catch(e){show('oVerify',e,false);}
+}
+
+function initials(s){return (s||'?').trim().slice(0,2).toUpperCase();}
+async function loadMe(){
+  try{
+    const d=await api('/api/v1/users/me',{auth:true});
+    $('pName').value=d.name??''; $('pBio').value=d.bio??''; $('pCountry').value=d.country??''; $('pAge').value=d.age??'';
+    $('meAvatar').textContent=initials(d.name||d.username);
+    renderLangs(d.languages||[]); show('oMe',d);
+  }catch(e){show('oMe',e,false);}
+}
+async function patchMe(){
+  const body={}; const n=$('pName').value,b=$('pBio').value,c=$('pCountry').value,a=$('pAge').value;
+  if(n!=='')body.name=n; if(b!=='')body.bio=b; if(c!=='')body.country=c; if(a!=='')body.age=Number(a);
+  try{const d=await api('/api/v1/users/me',{method:'PATCH',json:body,auth:true});show('oMe',d);renderLangs(d.languages||[]);$('meAvatar').textContent=initials(d.name||d.username);}
+  catch(e){show('oMe',e,false);}
+}
+function renderLangs(langs){
+  $('myLangs').innerHTML=langs.map(l=>`<span class="lng ${l.level==='native'?'nat':''}">${l.language} · ${l.level}</span>`).join('')||'<span style="font-size:12px;color:#9aa0ad">нет языков</span>';
+}
+async function addLang(){
+  try{const d=await api('/api/v1/users/me/languages',{method:'POST',json:{language:$('addLang').value,level:$('addLevel').value},auth:true});show('oLang',d);loadMe();}
+  catch(e){show('oLang',e,false);}
+}
+
+function fmtSeen(ts){
+  if(ts==null) return 'более года назад';
+  const diff=Math.floor(Date.now()/1000)-ts;
+  if(diff<60) return diff+' сек назад';
+  if(diff<3600) return Math.floor(diff/60)+' мин назад';
+  if(diff<86400) return Math.floor(diff/3600)+' ч назад';
+  return Math.floor(diff/86400)+' дн назад';
+}
+async function checkStatus(){
+  const id=Number($('stId').value); if(!id){show('oStatus','Укажи user_id',false);return;}
+  try{
+    const d=await api(`/api/v1/users/${id}/status`,{auth:true});
+    const human=d.online?'в сети':('был(а) в сети '+fmtSeen(d.last_seen));
+    show('oStatus',{...d,human});
+  }catch(e){show('oStatus',e,false);}
+}
+
+async function loadCatalog(){
+  try{
+    let list=await api('/api/v1/users/catalog',{auth:true});
+    const fl=$('fLang').value.trim().toLowerCase(), fc=$('fCountry').value.trim().toLowerCase();
+    if(fl)list=list.filter(u=>(u.languages||[]).some(l=>l.language.toLowerCase().includes(fl)));
+    if(fc)list=list.filter(u=>(u.country||'').toLowerCase().includes(fc));
+    $('people').innerHTML=list.map(u=>`
+      <div class="person" data-uid="${u.id}">
+        <div class="top">
+          <div class="avatar">${initials(u.name||u.username)}<span class="presence-dot" id="dot-${u.id}"></span></div>
+          <div>
+            <div class="nm">${u.name||u.username}</div>
+            <div class="uname">@${u.username}</div>
+          </div>
+        </div>
+        <div class="meta">${u.country||'—'}${u.age?' · '+u.age:''}</div>
+        <div class="langline">${(u.languages||[]).map(l=>`<span class="lng ${l.level==='native'?'nat':''}">${l.language} · ${l.level}</span>`).join('')}</div>
+        <div class="seen" id="seen-${u.id}"></div>
+        <button class="ghost sm" onclick="pickPeer(${u.id},'${(u.name||u.username).replace(/'/g,'')}')">Написать</button>
+      </div>`).join('') || '<div style="font-size:13px;color:#6c7587">Пусто. Подбор идёт по языкам — заведи изучаемый язык, у которого есть носители.</div>';
+    show('oCatalog',{count:list.length});
+    list.forEach(u=>refreshPresence(u.id));
+  }catch(e){show('oCatalog',e,false);}
+}
+async function refreshPresence(id){
+  try{
+    const d=await api(`/api/v1/users/${id}/status`,{auth:true});
+    const dot=$('dot-'+id), seen=$('seen-'+id);
+    if(dot)dot.className='presence-dot'+(d.online?' online':'');
+    if(seen)seen.textContent=d.online?'в сети':('был(а) '+fmtSeen(d.last_seen));
+  }catch(e){}
+}
+function pickPeer(id,name){
+  $('peerId').value=id; $('peerName').textContent=name; $('peerAvatar').textContent=initials(name); $('stId').value=id;
+  document.querySelectorAll('.card.span2')[1].scrollIntoView({behavior:'smooth'});
+}
+
+function addMsg(text,kind,ts){
+  const m=document.createElement('div');m.className='msg '+kind;
+  m.innerHTML=text+(ts?`<span class="t">${new Date(ts).toLocaleTimeString()}</span>`:'');
+  $('messages').appendChild(m);$('messages').scrollTop=$('messages').scrollHeight;
+}
+function setWsState(s,on){$('wsState').textContent=s;$('wsState').style.color=on?'#36C5B0':'#8A93AB';}
+function wsConnect(){
+  if(!S.access){addMsg('Сначала войди — нужен access-токен','sys');return;}
+  wsClose();
+  const url=base().replace(/^http/,'ws')+'/api/v1/chat/ws';
+  const ws=new WebSocket(url); S.ws=ws;
+  ws.onopen=()=>{ws.send(JSON.stringify({token:S.access}));setWsState('connected',true);addMsg('Соединение открыто, токен отправлен','sys');};
+  ws.onmessage=e=>{let d;try{d=JSON.parse(e.data);}catch{return;}
+    if(d.error){addMsg('warn: '+d.error,'sys');return;}
+    addMsg(d.text,d.sender_id===S.uid?'out':'in',d.created_at);};
+  ws.onclose=ev=>{setWsState('closed (code '+ev.code+')',false);if(ev.code===1008)addMsg('Закрыто 1008 — токен невалиден или почта не подтверждена','sys');};
+  ws.onerror=()=>addMsg('Ошибка сокета','sys');
+}
+function wsSend(){
+  const t=$('msgText').value.trim(), rid=Number($('peerId').value);
+  if(!t)return; if(!S.ws||S.ws.readyState!==1){addMsg('Нет соединения','sys');return;} if(!rid){addMsg('Укажи ID собеседника','sys');return;}
+  S.ws.send(JSON.stringify({receiver_id:rid,text:t}));$('msgText').value='';
+}
+function wsClose(){if(S.ws){S.ws.close();S.ws=null;}}
+async function loadHistory(){
+  const rid=Number($('peerId').value); if(!rid){addMsg('Укажи ID собеседника','sys');return;}
+  try{const list=await api('/api/v1/chat/history/'+rid,{auth:true});
+    $('messages').innerHTML='';
+    list.forEach(m=>addMsg(m.text,m.sender_id===S.uid?'out':'in',m.created_at));
+    addMsg('— конец истории ('+list.length+') —','sys');
+  }catch(e){addMsg('История: ошибка '+(e.status||''),'sys');}
+}
+
+async function ping(){
+  try{const r=await fetch(base()+'/docs');if(r.ok){$('apiPill').className='pill on';$('apiPillText').textContent='online';}else throw 0;}
+  catch{$('apiPill').className='pill off';$('apiPillText').textContent='offline';}
+  $('docsLink').href=base()+'/docs';
+}
+$('apiBase').addEventListener('change',ping); ping(); setInterval(ping,8000);
+
+(function(){
+  const c=$('constellation'),x=c.getContext('2d');let w,h,pts;
+  const WORDS=['你好','Hola','Привет','Hi','Bonjour','こんにちは','Ciao','Olá','مرحبا','안녕'];
+  function size(){w=c.width=c.offsetWidth;h=c.height=c.offsetHeight;pts=Array.from({length:Math.min(34,Math.floor(w/40))},()=>({x:Math.random()*w,y:Math.random()*h,vx:(Math.random()-.5)*.25,vy:(Math.random()-.5)*.25,w:WORDS[Math.floor(Math.random()*WORDS.length)],s:Math.random()>.8}));}
+  function draw(){
+    x.clearRect(0,0,w,h);
+    for(let i=0;i<pts.length;i++){const p=pts[i];p.x+=p.vx;p.y+=p.vy;if(p.x<0||p.x>w)p.vx*=-1;if(p.y<0||p.y>h)p.vy*=-1;
+      for(let j=i+1;j<pts.length;j++){const q=pts[j],dx=p.x-q.x,dy=p.y-q.y,d=Math.hypot(dx,dy);if(d<120){x.strokeStyle='rgba(54,197,176,'+(.13*(1-d/120))+')';x.lineWidth=1;x.beginPath();x.moveTo(p.x,p.y);x.lineTo(q.x,q.y);x.stroke();}}}
+    for(const p of pts){if(p.s){x.fillStyle='rgba(247,244,239,.55)';x.font='12px "JetBrains Mono",monospace';x.fillText(p.w,p.x,p.y);}else{x.fillStyle='rgba(255,107,92,.6)';x.beginPath();x.arc(p.x,p.y,1.6,0,7);x.fill();}}
+    requestAnimationFrame(draw);
+  }
+  if(!window.matchMedia('(prefers-reduced-motion:reduce)').matches){size();draw();window.addEventListener('resize',size);}
+})();
+</script>
+</body>
+</html>
