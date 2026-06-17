@@ -1,9 +1,12 @@
 from pydantic import BaseModel, EmailStr
 
+from app.schemas.users import UserSex
+
 
 class UserRegister(BaseModel):
     username: str
     name: str
+    sex: UserSex = UserSex.other
     password: str
     native_language: str
     learning_language: str

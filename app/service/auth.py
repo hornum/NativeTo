@@ -63,7 +63,8 @@ async def _issue_tokens(db: AsyncSession, user_id: int) -> dict:
 
 async def register_user(
         db: AsyncSession,
-        username: str, name: str, email: str, password: str, native_l: str, learning_l: str, learning_level: str
+        username: str, name: str, email: str, sex: str,
+        password: str, native_l: str, learning_l: str, learning_level: str
 ) -> dict:
     existing = await db.execute(
         select(User).where(or_(User.username == username, User.email == email))
@@ -71,7 +72,7 @@ async def register_user(
     if existing.scalar_one_or_none():
         raise HTTPException(status_code=400, detail="User already exists")
 
-    user = User(username=username, name=name, email=email, hashed_password=await _hash_password(password))
+    user = User(username=username, name=name, email=email, sex=sex, hashed_password=await _hash_password(password))
     db.add(user)
     await db.flush()
 

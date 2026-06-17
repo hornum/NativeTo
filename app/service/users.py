@@ -10,7 +10,7 @@ from app.schemas.users import UserProfile, UserLanguageSchema, UserLanguageLevel
 
 def build_profile(user: User) -> UserProfile:
     return UserProfile(
-        id=user.id, username=user.username, name=user.name,
+        id=user.id, username=user.username, name=user.name, sex=user.sex,
         email=user.email, avatar_url=user.avatar_url,
         bio=user.bio, country=user.country, age=user.age,
         languages=[UserLanguageSchema(id=l.id, language=l.language, level=l.level) for l in user.languages]
@@ -69,6 +69,8 @@ async def patch_user_data(db: AsyncSession, user_id: int, data: dict) -> UserPro
         user.country = data["country"]
     if data.get("age") is not None:
         user.age = data["age"]
+    if data.get("sex") is not None:
+        user.sex = data["sex"]
 
     if data.get("username") is not None:
         new_username = data["username"]

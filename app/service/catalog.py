@@ -39,6 +39,8 @@ async def get_users_catalog(db: AsyncSession, user_id: int, filters: CatalogFilt
         query = query.where(User.age >= filters.min_age)
     if filters.max_age is not None:
         query = query.where(User.age <= filters.max_age)
+    if filters.sex is not None:
+        query = query.where(User.sex == filters.sex)
 
     query = query.distinct().limit(filters.limit).offset(filters.offset)
 
