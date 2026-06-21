@@ -1,7 +1,7 @@
 from datetime import datetime
 from typing import Optional
 
-from sqlalchemy import String, DateTime, func, ForeignKey
+from sqlalchemy import String, DateTime, func, ForeignKey, Index
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.db.session import Base
@@ -17,12 +17,16 @@ class User(Base):
     email: Mapped[str] = mapped_column(String(100), unique=True, nullable=False)
     hashed_password: Mapped[str] = mapped_column(nullable=False)
     avatar_url: Mapped[Optional[str]] = mapped_column(nullable=True)
-    country: Mapped[Optional[str]] = mapped_column(String(100), nullable=True, index=True)
+    country: Mapped[Optional[str]] = mapped_column(String(100), nullable=True)
     age: Mapped[Optional[int]] = mapped_column(nullable=True, index=True)
     bio: Mapped[Optional[str]] = mapped_column(String(500), nullable=True)
     is_active: Mapped[bool] = mapped_column(default=True)
     is_verified: Mapped[bool] = mapped_column(default=False)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+    __table_args__ = (
+        Index("ix_users_country_age", "country", "age"),
+    )
 
     languages: Mapped[list["UserLanguage"]] = relationship(
         back_populates="user", cascade="all, delete-orphan"
